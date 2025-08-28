@@ -1,6 +1,12 @@
 from django.shortcuts import render
 
 # Create your views here.
+from rest_framework import permissions
+from .permissions import IsAdminOrReadOnly
+
+
+from rest_framework import filters
+
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, viewsets, status, permissions
 from rest_framework.response import Response
@@ -98,3 +104,37 @@ class MyBorrowsView(generics.ListAPIView):
 
     def get_queryset(self):
         return Borrow.objects.filter(user=self.request.user).select_related('book', 'book__author')
+
+# AuthorViewSet & BookViewSet: use IsAdminOrReadOnly
+class AuthorViewSet(viewsets.ModelViewSet):
+    queryset = Author.objects.all()
+    serializer_class = AuthorSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+class BookViewSet(viewsets.ModelViewSet):
+    queryset = Book.objects.select_related('author').all()
+    serializer_class = BookSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    # get_queryset already uses query params for filtering
+
+# Borrow views
+class BorrowListAdminView(generics.ListAPIView):
+    # Admin-only list of all borrows
+    permission_classes = [permissions.IsAdminUser]
+    serializer_class = BorrowSerializer
+    queryset = Borrow.objects.select_related('book', 'user', 'book__author').all()
+
+class BookViewSet(viewsets.ModelViewSet):
+    queryset = Book.objects.select_related('author').all()
+    serializer_class = BookSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    search_fields = ['title', 'isbn', 'author__name']
+    filterset_fields = ['copies_available']  # you can filter copies_available__gt=0 client-side
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        available = self.request.query_params.get("available")
+        if available and available.lower() in ("1", "true", "yes"):
+            qs = qs.filter(copies_available__gt=0)
+        return qs

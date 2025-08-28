@@ -43,3 +43,28 @@ class BorrowSerializer(serializers.ModelSerializer):
         model = Borrow
         fields = ("id", "user", "book", "book_id", "borrow_date", "return_date", "status")
         read_only_fields = ("user", "borrow_date", "return_date", "status")
+
+
+class BookSerializer(serializers.ModelSerializer):
+    author = AuthorSerializer(read_only=True)
+    author_id = serializers.PrimaryKeyRelatedField(
+        source='author', queryset=Author.objects.all(), write_only=True, required=True
+    )
+
+    class Meta:
+        model = Book
+        fields = ("id", "title", "isbn", "author", "author_id", "publication_year", "copies_available")
+
+    def validate_isbn(self, value):
+        # ensure ISBN uniqueness on create/update
+        qs = Book.objects.filter(isbn=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("A book with this ISBN already exists.")
+        return value
+
+    def validate_copies_available(self, value):
+        if value < 0:
+            raise serializers.ValidationError("copies_available must be 0 or greater.")
+        return value

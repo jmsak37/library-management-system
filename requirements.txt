@@ -1,0 +1,16 @@
+Django>=4.2,<5.0
+djangorestframework>=3.14
+drf-yasg>=1.21       # API docs (Swagger/OpenAPI)
+django-filter>=24.2  # Filtering support for API endpoints
+psycopg2-binary>=2.9 # PostgreSQL (Heroku/Production)
+gunicorn>=21.2       # WSGI server (Heroku deployment)
+dj-database-url>=2.1 # Parse DATABASE_URL (Heroku support)
+python-decouple>=3.8 # Manage environment variables
+
+# Testing
+pytest>=8.2
+pytest-django>=4.8
+factory-boy>=3.3
+
+# Optional extras (remove if not using)
+whitenoise>=6.6      # Serve static files in production
