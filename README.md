@@ -1,4 +1,4 @@
-# Library Management System — Backend (Django + DRF)
+# Library Management System - Backend (Django + DRF)
 
 **Author:** Julius  
 **Repository:** https://github.com/jmsak37/library-management-system  
