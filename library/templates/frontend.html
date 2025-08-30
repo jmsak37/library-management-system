@@ -1,0 +1,1511 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Library Management — UI</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+    :root{ --bg:#0f172a; --card:#0b1220; --muted:#9aa7c7; --accent:#60a5fa; --accent-2:#7c3aed; --glass: rgba(255,255,255,0.04); --success:#10b981; --danger:#ef4444; --radius:12px; --max-width:1100px; }
+    html,body{height:100%}
+    body{ margin:0; min-height:100%; background: linear-gradient(180deg, rgba(12,18,32,0.8), rgba(5,8,15,0.8)), radial-gradient(600px 300px at 10% 10%, rgba(124,58,237,0.08), transparent 20%), radial-gradient(400px 200px at 90% 90%, rgba(96,165,250,0.05), transparent 20%), var(--bg); color:#e6eef8; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; padding:32px 20px; box-sizing:border-box; display:flex; justify-content:center; }
+    .wrap{ width:100%; max-width:var(--max-width); }
+    header{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; }
+    header h1{ margin:0; font-size:1.5rem; letter-spacing: -0.4px; }
+    header p.muted{ margin:0; color:var(--muted); font-size:0.95rem; }
+    .columns{ display:grid; grid-template-columns: 1fr 360px; gap:20px; align-items:start; }
+    .card{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.04); box-shadow: 0 8px 30px rgba(2,6,23,0.6); border-radius:var(--radius); padding:18px; }
+    .card h2{ margin:0 0 8px 0; font-size:1.05rem; color:#f8fafc; }
+    .muted{ color:var(--muted); font-size:0.95rem; }
+    label{ display:block; font-size:0.85rem; color:var(--muted); margin-bottom:6px; }
+    input[type="text"], input[type="password"], input[type="number"], select, textarea{ width:100%; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.04); padding:10px 12px; border-radius:8px; color:#e6eef8; outline:none; box-sizing:border-box; font-size:0.95rem; }
+    textarea{ min-height:80px; resize:vertical; }
+    input::placeholder{ color: rgba(230,238,248,0.26) }
+    .row{ display:flex; gap:10px; align-items:center; }
+    .row .col{ flex:1; }
+    button{ display:inline-flex; align-items:center; justify-content:center; gap:8px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); color:white; border:none; padding:10px 12px; border-radius:10px; cursor:pointer; font-weight:600; font-size:0.95rem; transition: transform .06s ease, box-shadow .12s ease; box-shadow: 0 6px 18px rgba(92, 108, 255, 0.12); }
+    button.secondary{ background: transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); box-shadow:none; font-weight:600; }
+    button.small{ padding:6px 8px; font-size:0.9rem; border-radius:8px; }
+    button:hover{ transform: translateY(-3px); }
+    .booksList{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+    .bookItem{ display:flex; justify-content:space-between; gap:16px; padding:12px; border-radius:10px; background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent); border:1px solid rgba(255,255,255,0.02); align-items:center; }
+    .bookMeta{ display:flex; gap:12px; align-items:center; }
+    .bookTitle{ font-weight:700; font-size:1rem; }
+    .bookSub{ color:var(--muted); font-size:0.9rem; }
+    .statusPill{ padding:6px 8px; border-radius:999px; font-size:0.82rem; color:white; }
+    .statusAvailable{ background: linear-gradient(90deg, rgba(16,185,129,0.15), rgba(96,165,250,0.12)); color:var(--success); border:1px solid rgba(16,185,129,0.14); }
+    .statusNone{ background: rgba(255,255,255,0.02); color:var(--muted); border:1px solid rgba(255,255,255,0.02); }
+    .smallMuted{ font-size:0.85rem; color:var(--muted) }
+    #myBorrowsList .borrowRow{ display:flex; justify-content:space-between; gap:10px; align-items:center; padding:10px; border-radius:8px; background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent); border:1px solid rgba(255,255,255,0.02); margin-bottom:8px; }
+    .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999; }
+    .modal{ background:var(--card); padding:16px; border-radius:12px; width:560px; max-width:92%; color:inherit; box-shadow:0 12px 30px rgba(2,6,23,0.7); }
+    .modal h3{ margin:0 0 10px 0; }
+    .small-note{ font-size:0.85rem; color:var(--muted); margin-top:8px; }
+    pre { background: rgba(255,255,255,0.02); padding:10px; border-radius:8px; overflow:auto; color:var(--muted); white-space:pre-wrap; word-wrap:break-word; }
+    footer{ margin-top:18px; color:var(--muted); font-size:0.9rem; text-align:center; }
+    @media (max-width:920px){ .columns{ grid-template-columns: 1fr; } header{ flex-direction:column; align-items:flex-start; gap:6px; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Library Management</h1>
+        <p class="muted">UI for your backend (JWT auth). API base: <code id="apiBase">http://127.0.0.1:8000/api</code></p>
+      </div>
+      <div class="muted">Local demo • Save as <strong>frontend.html</strong></div>
+    </header>
+
+    <div class="columns">
+      <main>
+        <div class="card" id="authCard" style="margin-bottom:16px;">
+          <h2>Authentication</h2>
+
+          <div id="notLoggedIn">
+            <label>API Base URL</label>
+            <input id="apiBaseInput" value="http://127.0.0.1:8000/api" />
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+              <div>
+                <label>Registration number (username)</label>
+                <input id="username" placeholder="registration number / username" />
+              </div>
+              <div>
+                <label>Password</label>
+                <input id="password" placeholder="password" type="password" />
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:12px;">
+              <button id="btnLogin">Log in (get token)</button>
+              <button id="btnRegister" class="secondary">Register</button>
+              <button id="btnClear" class="secondary">Clear token</button>
+            </div>
+
+            <p class="muted" style="margin-top:10px">If you don't have an account, register here or create one via Django admin (use registration number as username).</p>
+            <p class="muted" style="margin-top:6px">Contact admin (if needed): <a href="mailto:jmsak37@gmail.com" style="color:inherit; text-decoration:underline;">jmsak37@gmail.com</a></p>
+          </div>
+
+          <div id="loggedIn" style="display:none">
+            <p style="margin:0"><strong id="who">you</strong> — <span class="smallMuted" id="tokenPreview"></span></p>
+            <div style="display:flex; gap:10px; margin-top:12px;">
+              <button id="btnLogout" class="secondary">Logout</button>
+              <button id="btnRefresh">Refresh my borrows</button>
+            </div>
+            <div style="margin-top:10px"><small class="muted">Tip: Use an admin account to see the admin panel.</small></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Books</h2>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr 140px; gap:10px; align-items:end;">
+            <div>
+              <label>Filter by title</label>
+              <input id="filterTitle" placeholder="partial title" />
+            </div>
+            <div>
+              <label>Filter by ISBN</label>
+              <input id="filterIsbn" placeholder="isbn" />
+            </div>
+            <div>
+              <label>Availability</label>
+              <select id="filterAvailable">
+                <option value="">All</option>
+                <option value="true">Available only</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:12px;">
+            <button id="btnLoadBooks">Load Books</button>
+            <div style="flex:1"></div>
+          </div>
+
+          <div id="booksList" class="booksList" aria-live="polite"></div>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+          <h2>My Borrows</h2>
+          <div id="myBorrowsList"><p class="muted">No borrows loaded</p></div>
+        </div>
+
+        <footer>
+          <div class="muted">This UI calls: <code>/api/token/</code>, <code>/api/auth/register/</code>, <code>/api/books/</code>, <code>/api/borrow/</code>, <code>/api/return/</code>, <code>/api/report-lost/</code>, <code>/api/my-borrows/</code>, <code>/api/borrows/</code>, <code>/api/approve-fine/</code>, <code>/api/claims/</code>, <code>/api/authors/</code>, <code>/api/users/</code> (optional).</div>
+        </footer>
+      </main>
+
+      <aside>
+        <div class="card" id="adminPanel" style="display:none;">
+          <h2>Admin • Create Book</h2>
+
+          <label>Title</label>
+          <input id="newTitle" />
+          <label>ISBN</label>
+          <input id="newIsbn" />
+          <label>Author</label>
+          <select id="newAuthor"><option value="">Loading authors...</option></select>
+          <label>Copies available</label>
+          <input id="newCopies" type="number" value="1" />
+          <label>Fine if lost (currency amount)</label>
+          <input id="newFine" type="number" placeholder="e.g. 50" min="0" step="0.01" />
+
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <button id="btnCreateBook">Create Book</button>
+            <button id="btnLoadBorrows" class="secondary">Load All Borrows</button>
+          </div>
+
+          <hr style="border:none; height:12px;">
+
+          <!-- Add Author Section -->
+          <h2 style="margin-top:8px;">Admin • Add Author</h2>
+          <label>Author Name</label>
+          <input id="newAuthorName" placeholder="Full name (required)" />
+          <label>Author Bio (optional)</label>
+          <textarea id="newAuthorBio" placeholder="Short bio (optional)"></textarea>
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <button id="btnCreateAuthor">Add Author</button>
+            <button id="btnReloadAuthors" class="secondary">Reload Authors</button>
+          </div>
+
+          <hr style="border:none; height:12px;">
+
+          <!-- Claims admin section -->
+          <h2 style="margin-top:8px;">Admin • Claims</h2>
+          <p class="muted">Users can claim they saw a book or returned it. Approve to remove fine or mark returned.</p>
+          <div id="claimsList" class="booksList"><p class="muted">No claims loaded</p></div>
+
+          <h3 style="margin-top:14px">All Borrows (admin)</h3>
+          <div id="allBorrows"></div>
+
+          <hr style="border:none; height:12px;">
+
+          <h3 style="margin-top:8px">Admin • Users</h3>
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <button id="btnListUsers" class="small secondary">List users</button>
+            <button id="btnRegisterUser" class="small">Register user</button>
+            <button id="btnRegisterAdmin" class="small">Register admin</button>
+          </div>
+          <div id="usersList" class="booksList"><p class="muted">No users loaded</p></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- modal container used for admin user picker and mpesa payment prompt -->
+  <div id="modalRoot" style="display:none;"></div>
+
+  <script>
+    // ----- Configuration ----- 
+    let API_BASE = document.getElementById('apiBaseInput').value.replace(/\/+$/, '');
+    const updateBaseDisplay = () => {
+      API_BASE = document.getElementById('apiBaseInput').value.replace(/\/+$/, '');
+      document.getElementById('apiBase').textContent = API_BASE;
+    };
+    document.getElementById('apiBaseInput').addEventListener('change', updateBaseDisplay);
+
+    // token storage
+    function saveToken(token) { localStorage.setItem('library_token', token); }
+    function getToken() { return localStorage.getItem('library_token'); }
+    function clearToken() { localStorage.removeItem('library_token'); }
+    function authHeaders() { const t = getToken(); return t ? { 'Authorization': 'Bearer ' + t } : {}; }
+
+    // safe parse helper (returns object, string, or null)
+    async function tryParseJson(res) {
+      try { return await res.json(); } catch (e) { try { return await res.text(); } catch (e2) { return null; } }
+    }
+
+    // date helpers
+    function isoDateFromDays(days) {
+      const d = new Date(); d.setDate(d.getDate() + days); return d.toISOString().slice(0,10);
+    }
+    function isDatePast(isoDateStr) {
+      if (!isoDateStr) return false;
+      const today = new Date(); today.setHours(0,0,0,0);
+      const target = new Date(isoDateStr); target.setHours(0,0,0,0);
+      return target < today;
+    }
+
+    // runtime flags
+    let isAdmin = false;
+
+    // small DOM helpers for modal (robust)
+    function showModal(content) {
+      const root = document.getElementById('modalRoot');
+      root.innerHTML = '';
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop';
+      if (typeof content === 'string') {
+        backdrop.innerHTML = content;
+      } else if (content instanceof Node) {
+        backdrop.appendChild(content);
+      } else {
+        backdrop.innerHTML = String(content);
+      }
+      root.appendChild(backdrop);
+      root.style.display = 'block';
+    }
+    function closeModal() {
+      const root = document.getElementById('modalRoot');
+      root.innerHTML = '';
+      root.style.display = 'none';
+    }
+
+    // Admin user picker (search + dropdown) - tries /users/ or /auth/users/
+    async function adminUserPicker(onSelect) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'modal';
+      wrapper.innerHTML = `
+        <h3>Borrow for user</h3>
+        <label>Enter registration number (username) or search the database</label>
+        <input id="adminUserSearch" placeholder="Type username or click 'List all users' below" />
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button id="adminUserListAll" class="secondary small">List all users</button>
+          <div style="flex:1"></div>
+          <button id="adminUserCancel" class="secondary">Cancel</button>
+          <button id="adminUserConfirm">Confirm</button>
+        </div>
+        <label style="margin-top:8px">Select user from results</label>
+        <select id="adminUserSelect" style="width:100%; margin-top:6px"><option value="">Search first</option></select>
+        <div class="small-note" style="margin-top:8px">Tip: registration number is used as username. The list excludes admin accounts.</div>
+      `;
+      showModal(wrapper);
+
+      const searchInput = document.getElementById('adminUserSearch');
+      const select = document.getElementById('adminUserSelect');
+      const cancelBtn = document.getElementById('adminUserCancel');
+      const confirmBtn = document.getElementById('adminUserConfirm');
+      const listAllBtn = document.getElementById('adminUserListAll');
+
+      let lastQuery = '';
+
+      async function fetchUsers(query, listAll=false) {
+        const endpoints = [
+          API_BASE + `/users/?search=${encodeURIComponent(query)}`,
+          API_BASE + `/auth/users/?search=${encodeURIComponent(query)}`,
+          API_BASE + `/users/?username=${encodeURIComponent(query)}`,
+          API_BASE + `/users/`  // list all fallback
+        ];
+        for (const url of endpoints) {
+          if (!listAll && !query) continue;
+          try {
+            const r = await fetch(url, { headers: { 'Content-Type': 'application/json', ...authHeaders() } });
+            if (!r.ok) continue;
+            const d = await tryParseJson(r);
+            const list = Array.isArray(d) ? d : (d.results || d);
+            // filter out admin accounts if flags present (is_staff/is_superuser)
+            const filtered = (list || []).filter(u => {
+              if (u === null || typeof u !== 'object') return true;
+              if ('is_staff' in u || 'is_superuser' in u) {
+                return !(u.is_staff || u.is_superuser);
+              }
+              // fallback: check groups or role attributes are not present
+              return true;
+            });
+            return filtered;
+          } catch (e) { /* try next */ }
+        }
+        return [];
+      }
+
+      async function doSearch(q) {
+        if (!q || q.length < 1) {
+          select.innerHTML = '<option value="">Type to search users or click List all</option>'; return;
+        }
+        lastQuery = q;
+        select.innerHTML = '<option value="">Searching...</option>';
+        const users = await fetchUsers(q);
+        if (lastQuery !== q) return; // stale
+        if (!users || users.length === 0) {
+          select.innerHTML = `<option value="">No users found for "${q}"</option>`; return;
+        }
+        select.innerHTML = '<option value="">Select user</option>';
+        users.forEach(u => {
+          const opt = document.createElement('option');
+          const uname = u.username || u.registration_number || u.regno || u.email || '';
+          opt.value = (u.id ?? u.pk ?? uname);
+          opt.dataset.username = uname || '';
+          opt.textContent = `${uname} ${u.first_name||''} ${u.last_name||''}`.trim() || (`user ${opt.value}`);
+          select.appendChild(opt);
+        });
+      }
+
+      searchInput.addEventListener('input', (ev) => {
+        const v = ev.target.value.trim();
+        clearTimeout(searchInput._timer);
+        searchInput._timer = setTimeout(()=> doSearch(v), 350);
+      });
+
+      listAllBtn.onclick = async () => {
+        select.innerHTML = '<option value="">Loading all users...</option>';
+        const users = await fetchUsers('', true);
+        if (!users || users.length === 0) {
+          select.innerHTML = '<option value="">No users found</option>'; return;
+        }
+        select.innerHTML = '<option value="">Select user</option>';
+        users.forEach(u => {
+          const opt = document.createElement('option');
+          const uname = u.username || u.registration_number || u.regno || u.email || '';
+          opt.value = (u.id ?? u.pk ?? uname);
+          opt.dataset.username = uname || '';
+          opt.textContent = `${uname} ${u.first_name||''} ${u.last_name||''}`.trim() || (`user ${opt.value}`);
+          select.appendChild(opt);
+        });
+      };
+
+      cancelBtn.onclick = () => { closeModal(); };
+      confirmBtn.onclick = () => {
+        // If a select option chosen, use it; otherwise allow using the typed username
+        const val = select.value;
+        const typed = searchInput.value.trim();
+        if (val) {
+          const selected = select.options[select.selectedIndex];
+          const username = selected.dataset.username || '';
+          closeModal();
+          onSelect({ id: val || null, username: username || null });
+        } else if (typed) {
+          // ask to confirm using typed registration number if not found
+          if (!confirm(`Use "${typed}" as registration number (username) to borrow for? If the user does not exist the backend may return an error.`)) return;
+          closeModal();
+          onSelect({ id: null, username: typed });
+        } else {
+          alert('Select a user or type a registration number first');
+        }
+      };
+    }
+
+    // ----- Authentication handlers -----
+    async function registerUser() {
+      updateBaseDisplay();
+      const username = prompt("Choose a registration number (username):");
+      if (!username) return;
+      const password = prompt("Choose a password (min 6 chars):");
+      if (!password) return;
+      try {
+        const res = await fetch(API_BASE + '/auth/register/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await tryParseJson(res);
+        if (!res.ok) { alert('Register failed: ' + JSON.stringify(data)); return; }
+        alert('Registered successfully. Now login using the registration number.');
+      } catch (e) { alert('Register error: ' + e); console.error(e); }
+    }
+
+    // Admin: create user (optionally promote to admin) - best-effort (tries multiple endpoints)
+    async function adminCreateUser(isAdminFlag=false) {
+      updateBaseDisplay();
+      const username = prompt("Enter registration number (username) to create:");
+      if (!username) return;
+      const password = prompt("Enter password for the user:");
+      if (!password) return;
+      try {
+        // Try auth/register first
+        let res = await fetch(API_BASE + '/auth/register/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ username, password })
+        });
+        let data = await tryParseJson(res);
+        if (!res.ok) {
+          // try /users/ create (Django Rest Framework)
+          res = await fetch(API_BASE + '/users/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
+            body: JSON.stringify({ username, password })
+          });
+          data = await tryParseJson(res);
+        }
+        if (!res.ok) { alert('Could not create user: ' + JSON.stringify(data)); return; }
+        alert('User created successfully.');
+        const newUserId = data.id || data.pk || null;
+        if (isAdminFlag && newUserId) {
+          // attempt to promote
+          const promoteResponses = [];
+          try {
+            // try PATCH /users/{id}/
+            const p = await fetch(API_BASE + `/users/${newUserId}/`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', ...authHeaders() },
+              body: JSON.stringify({ is_staff: true, is_superuser: true })
+            });
+            promoteResponses.push({ ok: p.ok, status: p.status, body: await tryParseJson(p) });
+          } catch (e) { promoteResponses.push({ error: String(e) }); }
+          // if promotions failed, inform the admin
+          const failed = promoteResponses.some(r => !r.ok);
+          if (failed) {
+            alert('Created user but could not automatically promote to admin. Backend may not support promotion via PATCH /users/{id}/. See console for details.');
+            console.log('promotion attempts', promoteResponses);
+          } else {
+            alert('User promoted to admin (best-effort).');
+          }
+        }
+        // refresh user list
+        if (isAdmin) loadUsersList();
+      } catch (err) { alert('Create user error: ' + err); console.error(err); }
+    }
+
+    function showLoggedIn(username, token) {
+      document.getElementById('notLoggedIn').style.display = 'none';
+      document.getElementById('loggedIn').style.display = 'block';
+      document.getElementById('who').textContent = username;
+      document.getElementById('tokenPreview').textContent = token.slice(0,20) + '...';
+      document.getElementById('adminPanel').style.display = 'none';
+      // check admin by calling /borrows/ (admin-only) but do not alert on failure
+      fetch(API_BASE + '/borrows/', { headers: { 'Content-Type': 'application/json', ...authHeaders() } })
+        .then(r => {
+          if (r.ok) {
+            isAdmin = true;
+            document.getElementById('adminPanel').style.display = 'block';
+            loadAuthors(); loadClaims(); fetchAllBorrows();
+            return r.json();
+          } else {
+            isAdmin = false;
+            return null;
+          }
+        }).then(data => {
+          if (data) {
+            const list = Array.isArray(data) ? data : (data.results || data);
+            renderAllBorrows(list);
+          }
+        }).catch(err => { console.error('Error checking admin:', err); isAdmin = false; });
+    }
+
+    function showLoggedOut() {
+      document.getElementById('notLoggedIn').style.display = 'block';
+      document.getElementById('loggedIn').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'none';
+      clearToken();
+      isAdmin = false;
+    }
+
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      updateBaseDisplay();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if (!username || !password) { alert('enter registration number (username) and password'); return; }
+      try {
+        const res = await fetch(API_BASE + '/token/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await tryParseJson(res);
+        if (!res.ok) { alert(JSON.stringify(data)); return; }
+        saveToken(data.access);
+        showLoggedIn(username, data.access);
+        loadBooks(); loadMyBorrows(); loadAuthors();
+      } catch (err) { alert('login failed: ' + err); console.error(err); }
+    });
+    document.getElementById('btnRegister').addEventListener('click', registerUser);
+    document.getElementById('btnClear').addEventListener('click', () => { clearToken(); showLoggedOut(); alert('token cleared'); });
+    document.getElementById('btnLogout').addEventListener('click', () => { showLoggedOut(); });
+
+    // ----- Books list -----
+    async function loadBooks() {
+      updateBaseDisplay();
+      const title = document.getElementById('filterTitle').value.trim();
+      const isbn = document.getElementById('filterIsbn').value.trim();
+      const avail = document.getElementById('filterAvailable').value;
+      const params = new URLSearchParams();
+      if (title) params.set('title', title);
+      if (isbn) params.set('isbn', isbn);
+      if (avail === 'true') params.set('available', 'true');
+      const url = API_BASE + '/books/?' + params.toString();
+      try {
+        const res = await fetch(url, { headers: { 'Content-Type': 'application/json', ...authHeaders() } });
+        if (!res.ok) { const body = await tryParseJson(res); alert('Error loading books: ' + JSON.stringify(body)); return; }
+        const data = await res.json();
+        renderBooks(data);
+      } catch (err) { alert('Error loading books (network): ' + err); console.error(err); }
+    }
+    document.getElementById('btnLoadBooks').addEventListener('click', loadBooks);
+
+    function renderBooks(page) {
+      const list = document.getElementById('booksList'); list.innerHTML = '';
+      const items = Array.isArray(page) ? page : (page.results || page);
+      if (!items || items.length === 0) { list.innerHTML = '<p class="muted">No books found</p>'; return; }
+      items.forEach(book => {
+        const div = document.createElement('div'); div.className = 'bookItem';
+        const left = document.createElement('div'); left.className='bookMeta';
+        const meta = document.createElement('div');
+
+        const fineVal = (book.lost_fine ?? book.fine_amount ?? book.lostFine ?? book.lost_fine_amount ?? 0);
+        // display lost fine directly under the title as requested
+        meta.innerHTML = `<div class="bookTitle">${escape(book.title)}</div><div class="bookSub">ISBN: ${escape(book.isbn || '')} — Author: ${escape(book.author?.name || book.author || '')}</div><div class="small-note" style="margin-top:6px">Fine if lost: ${fineVal}</div>`;
+        left.appendChild(meta);
+
+        const right = document.createElement('div'); right.style.display='flex'; right.style.alignItems='center'; right.style.gap='10px';
+        const copies = document.createElement('div'); copies.className='smallMuted'; copies.textContent = `Copies: ${book.copies_available ?? 0}`;
+
+        // Borrow button; admin gets "Borrow for user" dialog and actions
+        const borrowBtn = document.createElement('button'); borrowBtn.className='small';
+        if (isAdmin) {
+          borrowBtn.textContent = 'Borrow for user';
+          borrowBtn.onclick = () => {
+            adminUserPicker(async (userObj) => {
+              // userObj = { id, username }
+              let daysStr = prompt(`Days until due (leave blank = 14):`, '14');
+              let days = parseInt(daysStr || '14', 10); if (Number.isNaN(days) || days <= 0) days = 14;
+              const due_date = isoDateFromDays(days);
+              const payload = { book_id: book.id, due_date };
+              // send username if available, otherwise user_id
+              if (userObj && userObj.username) payload.username = String(userObj.username);
+              else if (userObj && userObj.id) payload.user_id = String(userObj.id);
+              try {
+                const res = await fetch(API_BASE + '/borrow/', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                  body: JSON.stringify(payload)
+                });
+                const payloadResp = await tryParseJson(res);
+                if (!res.ok) { alert('Borrow (admin for user) failed: ' + JSON.stringify(payloadResp)); return; }
+                alert('Borrow recorded for user (if backend supports it).');
+                loadBooks(); loadMyBorrows();
+                if (isAdmin) fetchAllBorrows();
+              } catch (e) { alert('Borrow for user error: ' + e); console.error(e); }
+            });
+          };
+        } else {
+          borrowBtn.textContent = 'Borrow';
+          borrowBtn.onclick = () => doBorrow(book.id, book.title);
+        }
+
+        right.appendChild(copies); right.appendChild(borrowBtn);
+
+        // Admin: add copies button, edit fine, delete book
+        if (isAdmin) {
+          const addCopy = document.createElement('button'); addCopy.className='small secondary'; addCopy.textContent='Add copies';
+          addCopy.onclick = async () => {
+            const addStr = prompt('How many copies to add? (positive integer)', '1');
+            const addNum = parseInt(addStr || '1', 10);
+            if (Number.isNaN(addNum) || addNum <= 0) { alert('Invalid number'); return; }
+            try {
+              const patchRes = await fetch(API_BASE + `/books/${book.id}/`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                body: JSON.stringify({ copies_available: (book.copies_available ?? 0) + addNum })
+              });
+              const patchBody = await tryParseJson(patchRes);
+              if (!patchRes.ok) { alert('Add copies failed: ' + JSON.stringify(patchBody)); return; }
+              alert('Copies updated');
+              loadBooks(); if (isAdmin) fetchAllBorrows();
+            } catch (err) { alert('Add copies error: ' + err); console.error(err); }
+          };
+          right.appendChild(addCopy);
+
+          const editFineBtn = document.createElement('button'); editFineBtn.className='small'; editFineBtn.textContent='Edit fine';
+          editFineBtn.onclick = async () => {
+            const current = book.lost_fine ?? book.fine_amount ?? 0;
+            const val = prompt('Set new lost fine (currency amount). Use 0 to clear:', String(current));
+            if (val === null) return;
+            const num = parseFloat(val);
+            if (Number.isNaN(num) || num < 0) { alert('Invalid fine'); return; }
+            try {
+              const r = await fetch(API_BASE + `/books/${book.id}/`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                body: JSON.stringify({ lost_fine: num })
+              });
+              const b = await tryParseJson(r);
+              if (!r.ok) { alert('Could not update fine: ' + JSON.stringify(b)); return; }
+              alert('Book fine updated');
+              loadBooks();
+            } catch (e) { alert('Update fine error: ' + e); console.error(e); }
+          };
+          right.appendChild(editFineBtn);
+
+          const deleteBookBtn = document.createElement('button'); deleteBookBtn.className='small secondary'; deleteBookBtn.textContent='Delete book';
+          deleteBookBtn.onclick = async () => {
+            if (!confirm('Delete this book from system? This is irreversible.')) return;
+            try {
+              const r = await fetch(API_BASE + `/books/${book.id}/`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json', ...authHeaders() }
+              });
+              if (r.status === 204 || r.ok) {
+                alert('Book deleted');
+                loadBooks(); if (isAdmin) fetchAllBorrows();
+              } else {
+                const body = await tryParseJson(r);
+                alert('Delete failed: ' + JSON.stringify(body));
+              }
+            } catch (e) { alert('Delete book error: ' + e); console.error(e); }
+          };
+          right.appendChild(deleteBookBtn);
+        }
+
+        div.appendChild(left); div.appendChild(right); list.appendChild(div);
+      });
+    }
+
+    function escape(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    // ----- Borrow / Return / Report Lost -----
+    async function doBorrow(bookId, bookTitle) {
+      updateBaseDisplay();
+      const t = getToken(); if (!t) { alert('Please log in first'); return; }
+      const daysStr = prompt(`Enter number of days until return for "${bookTitle}" (leave blank = 14 days):`, '14');
+      let days = parseInt(daysStr || '14', 10);
+      if (Number.isNaN(days) || days <= 0) days = 14;
+      const due_date = isoDateFromDays(days);
+      try {
+        const res = await fetch(API_BASE + '/borrow/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ book_id: bookId, due_date })
+        });
+        const data = await tryParseJson(res);
+        if (!res.ok) { alert('Borrow failed: ' + JSON.stringify(data)); return; }
+        alert(`Borrowed successfully. Due date: ${due_date}`);
+        loadBooks(); loadMyBorrows();
+        if (isAdmin) fetchAllBorrows();
+      } catch (err) { alert('Borrow error: ' + err); console.error(err); }
+    }
+
+    async function doReturn(borrow) {
+      updateBaseDisplay();
+      const t = getToken(); if (!t) { alert('Please log in first'); return; }
+      const borrowId = typeof borrow === 'object' ? borrow.id : borrow;
+      const status = typeof borrow === 'object' ? borrow.status : null;
+      if (status === 'lost' && typeof borrow === 'object' && (parseFloat(borrow.fine_due || 0) > 0) && !isAdmin) {
+        if (!confirm('This borrow is marked LOST and has a fine. You must submit a return request for admin review. Proceed?')) return;
+        return submitReturnClaim(borrowId);
+      }
+      if (!confirm('Mark this borrow as returned?')) return;
+      try {
+        const res = await fetch(API_BASE + '/return/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ borrow_id: borrowId })
+        });
+        const data = await tryParseJson(res);
+        if (!res.ok) { alert('Return failed: ' + JSON.stringify(data)); return; }
+        alert('Returned successfully');
+        loadBooks(); loadMyBorrows(); if (isAdmin) fetchAllBorrows();
+      } catch (err) { alert('Return error: ' + err); console.error(err); }
+    }
+
+    // report lost
+    async function reportLost(borrowId) {
+      updateBaseDisplay();
+      try {
+        const res = await fetch(API_BASE + '/report-lost/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ borrow_id: borrowId })
+        });
+        if (!res.ok) {
+          const body = await tryParseJson(res);
+          console.warn('report-lost failed', res.status, body);
+          return false;
+        }
+        return true;
+      } catch (err) { console.error('Report lost error', err); return false; }
+    }
+
+    // ----- My borrows (overdue auto-mark + improved claim/return UI) -----
+    async function loadMyBorrows() {
+      updateBaseDisplay();
+      const root = document.getElementById('myBorrowsList');
+      root.innerHTML = '<p class="muted">Loading borrows...</p>';
+      try {
+        const res = await fetch(API_BASE + '/my-borrows/', { headers: { 'Content-Type': 'application/json', ...authHeaders() } });
+        if (res.status === 401) {
+          root.innerHTML = '<p class="muted">Please login to see your borrows (401)</p>'; return;
+        }
+        if (!res.ok) {
+          const body = await tryParseJson(res);
+          root.innerHTML = `<p class="muted">Error loading borrows: ${res.status} ${res.statusText}</p>`;
+          console.error('loadMyBorrows failed', res.status, body); return;
+        }
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : (data.results || data);
+
+        // automatically mark overdue as lost (best-effort)
+        for (const b of list || []) {
+          if (b.status === 'borrowed' && (b.due_date && isDatePast(b.due_date))) {
+            await reportLost(b.id);
+          }
+        }
+
+        // reload after auto-reporting
+        const refreshed = await fetch(API_BASE + '/my-borrows/', { headers: { 'Content-Type': 'application/json', ...authHeaders() } });
+        const refreshedData = await tryParseJson(refreshed);
+        const finalList = Array.isArray(refreshedData) ? refreshedData : (refreshedData.results || refreshedData);
+        renderMyBorrows(finalList);
+      } catch (err) {
+        console.error('loadMyBorrows error', err);
+        root.innerHTML = '<p class="muted">Error loading (network/CORS). Check console for details.</p>';
+      }
+    }
+
+    function renderMyBorrows(list) {
+      const root = document.getElementById('myBorrowsList'); root.innerHTML = '';
+      if (!list || list.length === 0) { root.innerHTML = '<p class="muted">No borrows</p>'; return; }
+      list.forEach(b => {
+        const outer = document.createElement('div'); outer.className='borrowRow';
+        const left = document.createElement('div');
+        const dueText = b.due_date ? ` — Due: ${escape(b.due_date)}` : '';
+        left.innerHTML = `<div style="font-weight:700">${escape(b.book?.title || b.book)}</div><div class="smallMuted">Status: ${escape(b.status)}${dueText} — Borrowed: ${escape(b.borrow_date || '')}</div>`;
+        const right = document.createElement('div'); right.style.display='flex'; right.style.gap='8px';
+
+        const lostFine = parseFloat((b.book && (b.book.lost_fine ?? b.book.fine_amount ?? b.book.lostFine ?? 0)) || 0);
+        const fineDue = parseFloat(b.fine_due ?? 0);
+        const finePaid = !!b.fine_paid;
+
+        if (b.status === 'borrowed') {
+          const rbtn = document.createElement('button'); rbtn.className='small'; rbtn.textContent='Return';
+          rbtn.onclick = () => doReturn(b); right.appendChild(rbtn);
+
+          const lostBtn = document.createElement('button'); lostBtn.className='small secondary'; lostBtn.textContent='Report Lost';
+          lostBtn.onclick = () => { if (confirm('Report this borrow as lost? This will create a fine.')) reportLost(b.id).then(ok=>{ if (ok) { alert('Reported lost'); loadMyBorrows(); if (isAdmin) fetchAllBorrows(); } else { alert('Failed to report lost; see console.'); } }); };
+          right.appendChild(lostBtn);
+        } else if (b.status === 'lost') {
+          const fine = document.createElement('div'); fine.className='smallMuted'; fine.textContent = `Fine: ${fineDue ?? lostFine ?? 0} — Paid: ${finePaid ? 'Yes' : 'No'}`;
+          right.appendChild(fine);
+
+          if (finePaid) {
+            const paidNote = document.createElement('div'); paidNote.className='smallMuted'; paidNote.textContent = 'Fine paid — awaiting admin return approval';
+            right.appendChild(paidNote);
+          } else {
+            // If fine is zero, allow direct return attempt; otherwise show Claim to Return flow
+            if ((fineDue ?? lostFine ?? 0) === 0) {
+              const rbtn = document.createElement('button'); rbtn.className='small'; rbtn.textContent='Return';
+              rbtn.onclick = () => doReturn(b);
+              right.appendChild(rbtn);
+            } else {
+              const claimBtn = document.createElement('button'); claimBtn.className='small'; claimBtn.textContent='Claim to Return';
+              claimBtn.onclick = () => claimSeen(b); // handles payment & mpesa code
+              right.appendChild(claimBtn);
+            }
+            const submitReturn = document.createElement('button'); submitReturn.className='small secondary'; submitReturn.textContent='Claim to Return (admin)';
+            submitReturn.onclick = () => submitReturnClaim(b.id);
+            right.appendChild(submitReturn);
+          }
+        } else {
+          const info = document.createElement('div'); info.className='smallMuted'; info.textContent = (b.status === 'returned') ? 'Returned' : escape(b.status);
+          right.appendChild(info);
+        }
+
+        outer.appendChild(left); outer.appendChild(right); root.appendChild(outer);
+      });
+    }
+
+    // ----- Claim helpers -----
+    async function postClaimsWithOfferedAmountRetry(payload) {
+      updateBaseDisplay();
+      const url = API_BASE + '/claims/';
+      const headers = { 'Content-Type': 'application/json', ...authHeaders() };
+
+      // first try
+      let res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) });
+      if (res.ok) return { res, data: await tryParseJson(res) };
+
+      // parse body to detect offered_amount validation
+      const body = await tryParseJson(res);
+      const text = (typeof body === 'string') ? body : JSON.stringify(body || {});
+      if (res.status === 400 && /offered_amount/i.test(text)) {
+        // if offered_amount present, convert to string with two decimals and retry
+        if (payload.offered_amount !== undefined && payload.offered_amount !== null) {
+          const val = Number(payload.offered_amount);
+          if (!Number.isNaN(val)) payload.offered_amount = val.toFixed(2);
+          else payload.offered_amount = String(payload.offered_amount);
+        }
+        const retry = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) });
+        return { res: retry, data: await tryParseJson(retry) };
+      }
+      // otherwise just return original response
+      return { res, data: body };
+    }
+
+    // claimSeen handles payment instruction and allows user to paste MPESA code
+    async function claimSeen(borrowOrObj) {
+      updateBaseDisplay();
+      const t = getToken(); if (!t) { alert('Please log in to make a claim'); return; }
+
+      // normalize borrow object
+      let borrow = null;
+      if (typeof borrowOrObj === 'object') borrow = borrowOrObj;
+      else {
+        try {
+          const res = await fetch(API_BASE + '/my-borrows/', { headers: { 'Content-Type': 'application/json', ...authHeaders() } });
+          const data = await tryParseJson(res);
+          const list = Array.isArray(data) ? data : (data.results || data);
+          borrow = (list || []).find(x => x.id === borrowOrObj) || null;
+        } catch (e) { /* best-effort */ }
+      }
+      const borrowId = borrow ? borrow.id : borrowOrObj;
+
+      if (!confirm('Submit a claim that you saw the book (admin will review)?')) return;
+
+      const lostFine = borrow ? parseFloat((borrow.book && (borrow.book.lost_fine ?? borrow.book.fine_amount ?? 0)) || 0) : 0;
+      const fineDue = borrow ? parseFloat(borrow.fine_due ?? 0) : 0;
+      const baseFine = (fineDue > 0) ? fineDue : lostFine;
+
+      // offered_amount: 1/4 of baseFine when lost and baseFine>0
+      let offered_amount = null;
+      if (borrow && borrow.status === 'lost' && baseFine > 0) {
+        offered_amount = Math.round(baseFine * 0.25 * 100) / 100;
+      }
+
+      // If offered_amount is > 0, prompt for mpesa payment instructions and MPESA code
+      if (offered_amount !== null && offered_amount > 0) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+          <h3>Payment required (partial)</h3>
+          <div class="small-note">This book is marked lost. The suggested partial payment is <strong>${offered_amount}</strong> (1/4 of the fine).</div>
+          <div style="margin-top:10px;"><strong>Pay using M-Pesa</strong></div>
+          <ol style="margin-top:8px">
+            <li>Send ${offered_amount} to Paybill <strong>247247</strong>, Account <strong>7770180113894</strong>.</li>
+            <li>After payment, copy the M-Pesa transaction code or message (the short code shown by M-Pesa).</li>
+            <li>Paste the transaction code below and press Submit.</li>
+          </ol>
+          <label style="margin-top:8px">M-Pesa transaction code / message</label>
+          <input id="mpesaCodeInput" placeholder="Paste M-Pesa code here" style="padding:10px; height:44px;" />
+          <div style="display:flex; gap:8px; margin-top:12px; justify-content:flex-end;">
+            <button id="mpesaCancel" class="secondary">Cancel</button>
+            <button id="mpesaSubmit">OK — I paid, submit claim</button>
+          </div>
+          <div class="small-note" style="margin-top:8px">If you cannot pay now, press Cancel and use 'Claim to Return (admin)' to ask admin to review without payment.</div>
+        `;
+        showModal(modal);
+        document.getElementById('mpesaCancel').onclick = () => closeModal();
+        document.getElementById('mpesaSubmit').onclick = async () => {
+          const mpesa = document.getElementById('mpesaCodeInput').value.trim();
+          if (!mpesa) { alert('Please paste the M-Pesa transaction code/message'); return; }
+          closeModal();
+          const payload = {
+            borrow_id: borrowId,
+            type: 'saw',
+            offered_amount: offered_amount,
+            message: `Paid via M-Pesa. Code/message: ${mpesa}. User offers ${offered_amount}. Please approve.`
+          };
+          try {
+            const { res, data } = await postClaimsWithOfferedAmountRetry(payload);
+            if (!res.ok) {
+              let msg = `HTTP ${res.status}`;
+              if (data) msg += ' — ' + JSON.stringify(data);
+              alert('Could not submit claim: ' + msg);
+              return;
+            }
+            alert('Claim submitted with payment note. Admin will review the payment code and approve.');
+            await loadClaims(); await fetchAllBorrows(); await loadMyBorrows();
+          } catch (err) { alert('Claim error: ' + err); console.error(err); }
+        };
+        return;
+      }
+
+      // If offered_amount is null or zero (no payment required), just submit claim
+      const payload = { borrow_id: borrowId, type: 'saw', message: borrow && borrow.status === 'lost' ? 'User claims saw the book (no payment required)' : 'User claims saw the book.' };
+      if (offered_amount !== null) payload.offered_amount = offered_amount;
+      try {
+        const { res, data } = await postClaimsWithOfferedAmountRetry(payload);
+        if (!res.ok) {
+          let msg = `HTTP ${res.status}`;
+          if (res.status === 404) { msg += ' — /claims/ not found on backend.' }
+          if (data) msg += ' — ' + JSON.stringify(data);
+          alert('Could not submit claim: ' + msg);
+          return;
+        }
+        alert('Claim submitted. Admin will review.');
+        await loadClaims(); await fetchAllBorrows(); await loadMyBorrows();
+      } catch (err) { alert('Claim error: ' + err); console.error(err); }
+    }
+
+    // Submit a claim to indicate the user requests a return (admin review). This is for "Claim to Return (admin)" button.
+    async function submitReturnClaim(borrowId) {
+      updateBaseDisplay();
+      try {
+        // attempt to fetch borrow to compute amounts
+        let borrow = null;
+        try {
+          const res = await fetch(API_BASE + '/my-borrows/', { headers: { 'Content-Type': 'application/json', ...authHeaders() } });
+          const data = await tryParseJson(res);
+          const list = Array.isArray(data) ? data : (data.results || data);
+          borrow = (list || []).find(x => x.id === borrowId) || null;
+        } catch (e) { /* ignore */ }
+
+        let offered_amount = null;
+        if (borrow) {
+          const lostFine = parseFloat((borrow.book && (borrow.book.lost_fine ?? borrow.book.fine_amount ?? 0)) || 0);
+          const fineDue = parseFloat(borrow.fine_due ?? 0);
+          const baseFine = (fineDue > 0) ? fineDue : lostFine;
+          if (baseFine > 0) offered_amount = Math.round(baseFine * 0.25 * 100) / 100;
+          else offered_amount = 0;
+        }
+
+        // if offered_amount > 0, prompt for optional MPESA flow (same as claimSeen)
+        if (offered_amount !== null && offered_amount > 0) {
+          if (!confirm(`Suggested partial payment is ${offered_amount}. Press OK to follow payment instructions and submit payment info, or Cancel to submit request without payment.`)) {
+            const payloadNoPay = { borrow_id: borrowId, type: 'returned', offered_amount: offered_amount, message: `User requests return; offers ${offered_amount} (no payment proof provided).` };
+            const { res, data } = await postClaimsWithOfferedAmountRetry(payloadNoPay);
+            if (!res.ok) { alert('Could not submit return claim: ' + JSON.stringify(data)); return; }
+            alert('Return claim submitted (no payment info). Admin will review.');
+            await loadClaims(); await fetchAllBorrows(); await loadMyBorrows();
+            return;
+          }
+          const modal = document.createElement('div');
+          modal.className = 'modal';
+          modal.innerHTML = `
+            <h3>Payment required (partial)</h3>
+            <div class="small-note">Pay ${offered_amount} to Paybill <strong>247247</strong>, Account <strong>7770180113894</strong>.</div>
+            <label style="margin-top:8px">Paste M-Pesa transaction code</label>
+            <input id="mpesaCodeInput2" placeholder="M-Pesa code" style="padding:10px; height:44px;" />
+            <div style="display:flex; gap:8px; margin-top:12px; justify-content:flex-end;">
+              <button id="mpesaCancel2" class="secondary">Cancel</button>
+              <button id="mpesaSubmit2">OK — I paid, submit</button>
+            </div>
+            <div class="small-note" style="margin-top:8px">If you can't pay now, Cancel and an admin will review the request later.</div>
+          `;
+          showModal(modal);
+          document.getElementById('mpesaCancel2').onclick = () => closeModal();
+          document.getElementById('mpesaSubmit2').onclick = async () => {
+            const mpesa = document.getElementById('mpesaCodeInput2').value.trim();
+            if (!mpesa) { alert('Please paste the M-Pesa transaction code/message'); return; }
+            closeModal();
+            const payload = { borrow_id: borrowId, type: 'returned', offered_amount: offered_amount, message: `Paid via M-Pesa. Code: ${mpesa}. Offer: ${offered_amount}` };
+            const { res, data } = await postClaimsWithOfferedAmountRetry(payload);
+            if (!res.ok) { alert('Could not submit return claim: ' + JSON.stringify(data)); return; }
+            alert('Return claim submitted with payment note. Admin will review.');
+            await loadClaims(); await fetchAllBorrows(); await loadMyBorrows();
+          };
+          return;
+        }
+
+        const payload = { borrow_id: borrowId, type: 'returned', message: 'User requests return (no payment).' };
+        if (offered_amount !== null) payload.offered_amount = offered_amount;
+        const { res, data } = await postClaimsWithOfferedAmountRetry(payload);
+        if (!res.ok) { alert('Could not submit return claim: ' + JSON.stringify(data)); return; }
+        alert('Return claim submitted. Admin will review.');
+        await loadClaims(); await fetchAllBorrows(); await loadMyBorrows();
+      } catch (err) { alert('Could not submit return claim: ' + err); console.error(err); }
+    }
+
+    // ----- Admin functions (create book, view all borrows, approve fine & claims) -----
+    document.getElementById('btnCreateBook').addEventListener('click', async () => {
+      updateBaseDisplay();
+      const title = document.getElementById('newTitle').value.trim();
+      const isbn = document.getElementById('newIsbn').value.trim();
+      const author = document.getElementById('newAuthor').value;
+      const copies = parseInt(document.getElementById('newCopies').value || '1', 10);
+      const fine = parseFloat(document.getElementById('newFine').value || '0');
+      if (!title || !isbn || !author) { alert('title, isbn, author required'); return; }
+      try {
+        const res = await fetch(API_BASE + '/books/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ title, isbn, author_id: author, copies_available: copies, lost_fine: fine })
+        });
+        const data = await tryParseJson(res);
+        if (!res.ok) { alert('Create book failed: ' + JSON.stringify(data)); return; }
+        alert('Book created');
+        document.getElementById('newTitle').value = '';
+        document.getElementById('newIsbn').value = '';
+        document.getElementById('newCopies').value = '1';
+        document.getElementById('newFine').value = '';
+        loadBooks(); loadAuthors();
+      } catch (err) { alert('Create book error: ' + err); console.error(err); }
+    });
+
+    document.getElementById('btnLoadBorrows').addEventListener('click', () => fetchAllBorrows());
+
+    async function fetchAllBorrows() {
+      updateBaseDisplay();
+      if (!isAdmin) return;
+      try {
+        const res = await fetch(API_BASE + '/borrows/', { headers: { 'Content-Type': 'application/json', ...authHeaders() } });
+        if (!res.ok) { alert('Could not load borrows (need admin)'); return; }
+        const data = await tryParseJson(res);
+        const list = Array.isArray(data) ? data : (data.results || data);
+        renderAllBorrows(list);
+      } catch (err) { alert('Error loading borrows: ' + err); console.error(err); }
+    }
+
+    // helper to edit fine for a borrow (kept, but removed from UI in All Borrows)
+    async function editFineForBorrow(borrowId, currentFine) {
+      updateBaseDisplay();
+      const input = prompt('Enter new fine amount (leave blank to cancel). To remove fine set 0:', String(currentFine ?? 0));
+      if (input === null) return;
+      const num = parseFloat(input);
+      if (Number.isNaN(num)) { alert('Invalid number'); return; }
+      try {
+        const res = await fetch(API_BASE + `/borrows/${borrowId}/`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ fine_due: num })
+        });
+        const body = await tryParseJson(res);
+        if (!res.ok) {
+          console.warn('PATCH borrow failed', res.status, body);
+          alert('Could not update fine. Backend may not support PATCH /borrows/{id}/. See console.');
+          return;
+        }
+        alert('Fine updated');
+        fetchAllBorrows(); loadClaims(); loadMyBorrows(); loadBooks();
+      } catch (err) { alert('Update fine error: ' + err); console.error(err); }
+    }
+
+    function renderAllBorrows(data) {
+      const root = document.getElementById('allBorrows'); root.innerHTML = '';
+      const list = Array.isArray(data) ? data : (data && data.results) ? data.results : [];
+      if (!list || list.length === 0) { root.innerHTML = '<p class="muted">No borrows</p>'; return; }
+      const condensed = list.slice(0,2);
+      const container = document.createElement('div');
+      const makeItem = (b) => {
+        const d = document.createElement('div'); d.className='bookItem';
+        const left = document.createElement('div'); left.style.minWidth='0';
+        const userLabel = (b.user && (b.user.username || b.user.email)) ? (b.user.username || b.user.email) : (b.user || '');
+        left.innerHTML = `<div class="bookTitle">${escape(b.book?.title || b.book)}</div><div class="bookSub">User: ${escape(userLabel)} — Status: ${escape(b.status)} — Fine: ${b.fine_due ?? 0} — Paid: ${b.fine_paid ? 'Yes' : 'No'}</div>`;
+        const right = document.createElement('div');
+
+        if (b.status === 'lost') {
+          if (!b.fine_paid) {
+            const approve = document.createElement('button'); approve.className='small'; approve.textContent='Approve Payment (clear fine)';
+            approve.onclick = () => approveFineForBorrow(b.id);
+            right.appendChild(approve);
+          } else {
+            const paid = document.createElement('div'); paid.className='smallMuted'; paid.textContent = 'Fine paid';
+            right.appendChild(paid);
+          }
+          const markReturned = document.createElement('button'); markReturned.className='small secondary'; markReturned.textContent='Mark returned';
+          markReturned.onclick = async () => {
+            if (!confirm('Mark this lost borrow as returned? This will set status returned and increment copies.')) return;
+            try {
+              const res = await fetch(API_BASE + '/return/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                body: JSON.stringify({ borrow_id: b.id })
+              });
+              const payload = await tryParseJson(res);
+              if (!res.ok) { alert('Mark returned failed: ' + JSON.stringify(payload)); return; }
+              alert('Marked returned');
+              fetchAllBorrows(); loadMyBorrows(); loadClaims();
+            } catch (e) { alert('Mark returned error: ' + e); console.error(e); }
+          };
+          right.appendChild(markReturned);
+        } else if (b.status === 'borrowed') {
+          const info = document.createElement('div'); info.className='smallMuted'; info.textContent = 'Borrowed';
+          right.appendChild(info);
+        } else if (b.status === 'returned') {
+          const info = document.createElement('div'); info.className='smallMuted'; info.textContent = 'Returned';
+          right.appendChild(info);
+        }
+
+        // removed Edit fine and Remove fine buttons in All Borrows as requested
+        d.appendChild(left); d.appendChild(right);
+        return d;
+      };
+
+      condensed.forEach(b => container.appendChild(makeItem(b)));
+
+      if (list.length > 2) {
+        const toggleBtn = document.createElement('button'); toggleBtn.className='small secondary'; toggleBtn.textContent = 'Show all';
+        let expanded = false;
+        const expandedContainer = document.createElement('div');
+        toggleBtn.onclick = () => {
+          expanded = !expanded;
+          if (expanded) {
+            expandedContainer.innerHTML = '';
+            list.forEach(b => expandedContainer.appendChild(makeItem(b)));
+            toggleBtn.textContent = 'Show less';
+            container.appendChild(expandedContainer);
+          } else {
+            toggleBtn.textContent = 'Show all';
+            expandedContainer.innerHTML = '';
+            if (expandedContainer.parentNode) expandedContainer.parentNode.removeChild(expandedContainer);
+          }
+        };
+        container.appendChild(toggleBtn);
+      }
+
+      root.appendChild(container);
+    }
+
+    // approve fine (admin) - improved flow: tries to mark returned after approve and handles fallbacks
+    async function approveFineForBorrow(borrowId) {
+      updateBaseDisplay();
+      if (!confirm('Approve (clear) fine for this borrow?')) return;
+      try {
+        let res = await fetch(API_BASE + '/approve-fine/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ borrow_id: borrowId })
+        });
+        const body = await tryParseJson(res);
+        if (!res.ok) {
+          console.warn('approve-fine returned', res.status, body);
+          alert('Approve fine request returned: ' + res.status + ' — check console for details');
+          return;
+        }
+        alert('Fine approved/cleared');
+
+        // Try to mark returned
+        try {
+          const ret = await fetch(API_BASE + '/return/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
+            body: JSON.stringify({ borrow_id: borrowId })
+          });
+          const retBody = await tryParseJson(ret);
+          if (ret.ok) {
+            alert('Borrow also marked as returned.');
+            fetchAllBorrows(); loadMyBorrows(); loadClaims(); return;
+          } else {
+            console.warn('Direct return attempt failed', ret.status, retBody);
+          }
+        } catch (e) { console.warn('Error calling /return/ after approve-fine:', e); }
+
+        // Fallback: create returned claim then approve it
+        try {
+          const cRes = await fetch(API_BASE + '/claims/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
+            body: JSON.stringify({ borrow_id: borrowId, type: 'returned', message: 'Auto-created by admin UI after payment approval.' })
+          });
+          const cBody = await tryParseJson(cRes);
+          if (!cRes.ok) {
+            console.warn('Could not create fallback returned claim', cRes.status, cBody);
+            alert('Fine approved but could not automatically mark returned. Please use "Mark returned" button. See console for details.');
+            fetchAllBorrows(); loadMyBorrows(); loadClaims(); return;
+          }
+          const claimId = cBody.id;
+          if (!claimId) {
+            console.warn('Created claim but no id returned', cBody);
+            alert('Fine approved but automatic returned flow failed (no claim id). Use "Mark returned" manually.');
+            fetchAllBorrows(); loadMyBorrows(); loadClaims(); return;
+          }
+          // approve claim
+          let aRes = await fetch(API_BASE + `/claims/${claimId}/approve/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders() }
+          });
+          if (!aRes.ok) {
+            aRes = await fetch(API_BASE + '/claims/approve/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', ...authHeaders() },
+              body: JSON.stringify({ claim_id: claimId, approve: true })
+            });
+          }
+          const aBody = await tryParseJson(aRes);
+          if (!aRes.ok) {
+            console.warn('Approving fallback claim failed', aRes.status, aBody);
+            alert('Fine approved but could not automatically mark returned. Please use "Mark returned" button. See console for details.');
+            fetchAllBorrows(); loadMyBorrows(); loadClaims(); return;
+          }
+          alert('Fine approved and borrow marked returned via claim approval.');
+          fetchAllBorrows(); loadMyBorrows(); loadClaims(); return;
+        } catch (err) {
+          console.error('Fallback returned claim flow error', err);
+          alert('Fine approved but automatic returned flow failed. Please mark returned manually in admin panel.');
+          fetchAllBorrows(); loadMyBorrows(); loadClaims(); return;
+        }
+      } catch (err) { alert('Approve fine error: ' + err); console.error(err); }
+    }
+
+    async function approveClaim(claimId, borrowId) {
+      updateBaseDisplay();
+      if (!confirm('Approve this claim? This will attempt to clear the fine for the borrow and mark returned if applicable.')) return;
+      try {
+        let res = await fetch(API_BASE + `/claims/${claimId}/approve/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() }
+        });
+        if (!res.ok) {
+          res = await fetch(API_BASE + '/claims/approve/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
+            body: JSON.stringify({ claim_id: claimId, approve: true })
+          });
+        }
+        if (!res.ok) {
+          const body = await tryParseJson(res);
+          console.warn('approve claim failed', res.status, body);
+          alert('Claim approval returned: ' + res.status + '. See console for details.');
+        } else {
+          await fetch(API_BASE + '/approve-fine/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
+            body: JSON.stringify({ borrow_id: borrowId })
+          }).catch(()=>{});
+          await fetch(API_BASE + '/return/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
+            body: JSON.stringify({ borrow_id: borrowId })
+          }).catch(()=>{});
+          alert('Claim approved. System attempted to clear fine and mark returned (backend must support these actions).');
+          loadClaims(); fetchAllBorrows(); loadMyBorrows();
+        }
+      } catch (err) { alert('Approve claim error: ' + err); console.error(err); }
+    }
+
+    async function declineClaim(claimId) {
+      updateBaseDisplay();
+      if (!confirm('Decline this claim? Fine will remain.')) return;
+      try {
+        let res = await fetch(API_BASE + `/claims/${claimId}/decline/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() }
+        });
+        if (!res.ok) {
+          res = await fetch(API_BASE + '/claims/approve/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
+            body: JSON.stringify({ claim_id: claimId, approve: false })
+          });
+        }
+        if (!res.ok) {
+          const body = await tryParseJson(res);
+          console.warn('decline claim returned', res.status, body);
+          alert('Decline returned: ' + res.status + '. See console.');
+        } else {
+          alert('Claim declined. Fine remains.');
+          loadClaims();
+        }
+      } catch (err) { alert('Decline claim error: ' + err); console.error(err); }
+    }
+
+    // ----- Authors and users -----
+    async function loadAuthors() {
+      updateBaseDisplay();
+      const select = document.getElementById('newAuthor');
+      select.innerHTML = '<option value="">Loading authors...</option>';
+      try {
+        let res = await fetch(API_BASE + '/authors/', { headers: { 'Content-Type': 'application/json' } });
+        if (res.status === 401) res = await fetch(API_BASE + '/authors/', { headers: { 'Content-Type': 'application/json', ...authHeaders() } });
+        if (!res.ok) { select.innerHTML = '<option value="">No authors</option>'; console.warn('authors fetch returned', res.status); return; }
+        const authors = await tryParseJson(res);
+        const list = Array.isArray(authors) ? authors : (authors.results || authors);
+        if (!list || list.length === 0) { select.innerHTML = '<option value="">No authors found</option>'; return; }
+        select.innerHTML = '<option value="">Select author</option>';
+        list.forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a.id ?? a.pk ?? '';
+          const label = a.name || a.full_name || a.username || a.title || (`Author ${opt.value}`);
+          opt.textContent = `${opt.value} — ${label}`;
+          select.appendChild(opt);
+        });
+      } catch (e) { console.error('Could not load authors', e); select.innerHTML = '<option value="">Error loading authors</option>'; }
+    }
+
+    document.getElementById('btnCreateAuthor').addEventListener('click', async () => {
+      updateBaseDisplay();
+      const name = document.getElementById('newAuthorName').value.trim();
+      const bio = document.getElementById('newAuthorBio').value.trim();
+      if (!name) { alert('Author name is required'); return; }
+      try {
+        const res = await fetch(API_BASE + '/authors/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ name, bio })
+        });
+        const data = await tryParseJson(res);
+        if (!res.ok) { alert('Create author failed: ' + JSON.stringify(data)); return; }
+        alert('Author added successfully');
+        document.getElementById('newAuthorName').value = '';
+        document.getElementById('newAuthorBio').value = '';
+        await loadAuthors();
+      } catch (err) { alert('Create author error: ' + err); console.error(err); }
+    });
+    document.getElementById('btnReloadAuthors').addEventListener('click', loadAuthors);
+
+    // ----- Claims: load (admin & user) -----
+    async function loadClaims() {
+      updateBaseDisplay();
+      const out = document.getElementById('claimsList');
+      out.innerHTML = '<p class="muted">Loading claims...</p>';
+      try {
+        const res = await fetch(API_BASE + '/claims/', { headers: { 'Content-Type': 'application/json', ...authHeaders() } });
+        if (res.status === 401 || res.status === 403) {
+          out.innerHTML = '<p class="muted">Login as admin to see claims</p>';
+          console.warn('claims fetch returned', res.status); return;
+        }
+        if (!res.ok) {
+          const body = await tryParseJson(res);
+          out.innerHTML = `<p class="muted">Error loading claims: ${res.status}</p>`;
+          console.warn('claims fetch returned', res.status, body); return;
+        }
+        const data = await tryParseJson(res);
+        const list = Array.isArray(data) ? data : (data.results || data);
+        if (!list || list.length === 0) { out.innerHTML = '<p class="muted">No claims</p>'; return; }
+        out.innerHTML = '';
+        list.forEach(c => {
+          const div = document.createElement('div'); div.className = 'bookItem';
+          const left = document.createElement('div'); left.style.minWidth='0';
+          const userLabel = (c.user && (c.user.username || c.user.email)) ? (c.user.username || c.user.email) : (c.user || '');
+          const offered = (c.offered_amount !== undefined && c.offered_amount !== null) ? ` — Offered: ${c.offered_amount}` : '';
+          left.innerHTML = `<div class="bookTitle">Claim #${escape(c.id)} — Borrow: ${escape(c.borrow_id)}</div><div class="bookSub">User: ${escape(userLabel)} — Type: ${escape(c.type || '')} — Status: ${escape(c.status || '')}${offered}</div>`;
+          if (c.message) {
+            const pre = document.createElement('pre');
+            pre.textContent = c.message;
+            left.appendChild(pre);
+          }
+          const right = document.createElement('div');
+          if (isAdmin) {
+            const approve = document.createElement('button'); approve.className='small'; approve.textContent='Approve';
+            approve.onclick = () => approveClaim(c.id, c.borrow_id);
+            const decline = document.createElement('button'); decline.className='small secondary'; decline.textContent='Decline';
+            decline.onclick = () => declineClaim(c.id);
+            const del = document.createElement('button'); del.className='small secondary'; del.textContent='Delete claim';
+            del.onclick = async () => {
+              if (!confirm('Delete this claim? This is irreversible.')) return;
+              try {
+                const r = await fetch(API_BASE + `/claims/${c.id}/`, {
+                  method: 'DELETE',
+                  headers: { 'Content-Type': 'application/json', ...authHeaders() }
+                });
+                if (r.status === 204 || r.ok) {
+                  alert('Claim deleted');
+                  loadClaims(); fetchAllBorrows(); loadMyBorrows();
+                } else {
+                  const body = await tryParseJson(r);
+                  alert('Delete claim failed: ' + JSON.stringify(body));
+                }
+              } catch (e) { alert('Delete claim error: ' + e); console.error(e); }
+            };
+            right.appendChild(approve); right.appendChild(decline); right.appendChild(del);
+          }
+          div.appendChild(left); div.appendChild(right); out.appendChild(div);
+        });
+      } catch (err) { console.error('loadClaims error', err); out.innerHTML = '<p class="muted">Error loading claims (check console)</p>'; }
+    }
+
+    // ----- Users: list, block, set password, logout (admin) -----
+    async function loadUsersList() {
+      updateBaseDisplay();
+      const out = document.getElementById('usersList');
+      out.innerHTML = '<p class="muted">Loading users...</p>';
+      try {
+        // try /users/ endpoint
+        let res = await fetch(API_BASE + '/users/', { headers: { 'Content-Type': 'application/json', ...authHeaders() } });
+        if (!res.ok) {
+          // try /auth/users/
+          res = await fetch(API_BASE + '/auth/users/', { headers: { 'Content-Type': 'application/json', ...authHeaders() } });
+        }
+        if (!res.ok) {
+          out.innerHTML = '<p class="muted">Could not load users (backend may not expose /users/)</p>';
+          console.warn('users fetch returned', res.status);
+          return;
+        }
+        const data = await tryParseJson(res);
+        const list = Array.isArray(data) ? data : (data.results || data);
+        // filter non-admins where possible
+        const filtered = (list || []).filter(u => { if (!u || typeof u !== 'object') return true; if ('is_staff' in u || 'is_superuser' in u) return !(u.is_staff || u.is_superuser); return true; });
+        if (!filtered || filtered.length === 0) { out.innerHTML = '<p class="muted">No users found</p>'; return; }
+        out.innerHTML = '';
+        filtered.forEach(u => {
+          const div = document.createElement('div'); div.className = 'bookItem';
+          const left = document.createElement('div'); left.style.minWidth='0';
+          const uname = u.username || u.registration_number || u.email || (`id:${u.id||u.pk||''}`);
+          left.innerHTML = `<div class="bookTitle">${escape(uname)}</div><div class="bookSub">ID: ${escape(u.id ?? u.pk ?? '')} — Active: ${('is_active' in u) ? (u.is_active ? 'Yes' : 'No') : 'unknown'}</div>`;
+          const right = document.createElement('div');
+          // buttons: set password to welcome, block, logout
+          const setPass = document.createElement('button'); setPass.className='small'; setPass.textContent='Set password to "welcome"';
+          setPass.onclick = async () => {
+            if (!confirm(`Set password for ${uname} to "welcome"?`)) return;
+            try {
+              // try to set password via endpoint
+              let r = await fetch(API_BASE + `/users/${u.id ?? u.pk}/set_password/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                body: JSON.stringify({ password: 'welcome' })
+              });
+              if (!r.ok) {
+                // fallback: PATCH user (if allowed)
+                r = await fetch(API_BASE + `/users/${u.id ?? u.pk}/`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                  body: JSON.stringify({ password: 'welcome' })
+                });
+              }
+              const body = await tryParseJson(r);
+              if (!r.ok) { alert('Could not set password. Backend may not support server-side password changes via API. See console.'); console.warn('setPass failed', r.status, body); return; }
+              alert('Password set to "welcome" (best-effort).');
+            } catch (e) { alert('Error setting password: ' + e); console.error(e); }
+          };
+          right.appendChild(setPass);
+
+          const blockBtn = document.createElement('button'); blockBtn.className='small secondary'; blockBtn.textContent='Block user';
+          blockBtn.onclick = async () => {
+            if (!confirm(`Block user ${uname}?`)) return;
+            try {
+              let r = await fetch(API_BASE + `/users/${u.id ?? u.pk}/block/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...authHeaders() },
+              });
+              if (!r.ok) {
+                // fallback to PATCH is_active=false
+                r = await fetch(API_BASE + `/users/${u.id ?? u.pk}/`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                  body: JSON.stringify({ is_active: false })
+                });
+              }
+              const body = await tryParseJson(r);
+              if (!r.ok) { alert('Could not block user: ' + JSON.stringify(body)); return; }
+              alert('User blocked (best-effort).');
+              loadUsersList();
+            } catch (e) { alert('Block user error: ' + e); console.error(e); }
+          };
+          right.appendChild(blockBtn);
+
+          const logoutBtn = document.createElement('button'); logoutBtn.className='small secondary'; logoutBtn.textContent='Force logout';
+          logoutBtn.onclick = async () => {
+            if (!confirm(`Force logout for ${uname}?`)) return;
+            try {
+              let r = await fetch(API_BASE + `/users/${u.id ?? u.pk}/logout/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...authHeaders() },
+              });
+              if (!r.ok) {
+                r = await fetch(API_BASE + `/auth/users/${u.id ?? u.pk}/logout/`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', ...authHeaders() },
+                });
+              }
+              const body = await tryParseJson(r);
+              if (!r.ok) {
+                alert('Could not force logout. Backend may not expose logout endpoint. See console.');
+                console.warn('force logout failed', r.status, body);
+                return;
+              }
+              alert('User logged out (best-effort).');
+            } catch (e) { alert('Force logout error: ' + e); console.error(e); }
+          };
+          right.appendChild(logoutBtn);
+
+          div.appendChild(left); div.appendChild(right); out.appendChild(div);
+        });
+      } catch (err) {
+        console.error('loadUsersList error', err);
+        out.innerHTML = '<p class="muted">Error loading users (check console)</p>';
+      }
+    }
+
+    // Attach admin user functions to buttons
+    document.getElementById('btnListUsers').addEventListener('click', () => loadUsersList());
+    document.getElementById('btnRegisterUser').addEventListener('click', () => adminCreateUser(false));
+    document.getElementById('btnRegisterAdmin').addEventListener('click', () => adminCreateUser(true));
+
+    // ----- Claims: load (admin & user) (already present) -----
+
+    // ----- startup -----
+    (function init() {
+      const t = getToken();
+      loadAuthors();
+      loadClaims(); // attempt to load claims (admin only)
+      if (t) {
+        showLoggedIn('you', t);
+        loadBooks(); loadMyBorrows();
+      } else {
+        showLoggedOut();
+      }
+    })();
+
+    // helpers: refresh borrows
+    document.getElementById('btnRefresh').addEventListener('click', () => loadMyBorrows());
+  </script>
+</body>
+</html>
