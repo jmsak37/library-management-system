@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "library-management-system-t7o4.onrender.com",
+    "library-management-system-t7o4.onrender.com",  # your Render domain
 ]
 
 

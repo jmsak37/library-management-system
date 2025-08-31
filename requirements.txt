@@ -1,5 +1,6 @@
 Django>=4.2,<5.0
 djangorestframework>=3.14
+djangorestframework-simplejwt>=5.3.1
 djangorestframework-simplejwt>=5.3.1   # JWT authentication support
 drf-yasg>=1.21       # API docs (Swagger/OpenAPI)
 django-filter>=24.2  # Filtering support for API endpoints
