@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Library Management — UI</title>
+  <title>Library Management</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
@@ -67,7 +67,7 @@
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
               <div>
-                <label>Registration number (username)</label>
+                <label>Registration number</label>
                 <input id="username" placeholder="registration number / username" />
               </div>
               <div>
@@ -358,7 +358,7 @@
       wrapper.className = 'modal';
       wrapper.innerHTML = `
         <h3>Borrow for user</h3>
-        <label>Enter registration number (username) or search the database</label>
+        <label>Enter registration number or search the database</label>
         <input id="adminUserSearch" placeholder="Type username or click 'List all users' below" />
         <div style="display:flex; gap:8px; margin-top:8px;">
           <button id="adminUserListAll" class="secondary small">List all users</button>
@@ -435,7 +435,7 @@
           closeModal();
           onSelect({ id: val || null, username: username || null });
         } else if (typed) {
-          if (!confirm(`Use "${typed}" as registration number (username) to borrow for? If the user does not exist the backend may return an error.`)) return;
+          if (!confirm(`Use "${typed}" as registration number to borrow for? If the user does not exist the backend may return an error.`)) return;
           closeModal();
           onSelect({ id: null, username: typed });
         } else {
@@ -447,7 +447,7 @@
     // ----- Authentication handlers -----
     async function registerUser() {
       updateBaseDisplay();
-      const username = prompt("Choose a registration number (username):");
+      const username = prompt("Choose a registration number:");
       if (!username) return;
       const password = prompt("Choose a password (min 6 chars):");
       if (!password) return;
@@ -468,7 +468,7 @@
     // Admin: create user (optionally promote to admin) - best-effort (tries multiple endpoints)
     async function adminCreateUser(isAdminFlag=false) {
       updateBaseDisplay();
-      const username = prompt("Enter registration number (username) to create:");
+      const username = prompt("Enter registration number to create:");
       if (!username) return;
       const password = prompt("Enter password for the user:");
       if (!password) return;
@@ -558,7 +558,7 @@
       updateBaseDisplay();
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
-      if (!username || !password) { alert('enter registration number (username) and password'); return; }
+      if (!username || !password) { alert('enter registration number and password'); return; }
       try {
         const res = await fetch(API_BASE + '/token/', {
           method: 'POST',
