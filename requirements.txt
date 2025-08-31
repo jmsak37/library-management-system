@@ -1,10 +1,11 @@
 Django>=4.2,<5.0
 djangorestframework>=3.14
+djangorestframework-simplejwt>=5.3.1   # JWT authentication support
 drf-yasg>=1.21       # API docs (Swagger/OpenAPI)
 django-filter>=24.2  # Filtering support for API endpoints
-psycopg2-binary>=2.9 # PostgreSQL (Heroku/Production)
-gunicorn>=21.2       # WSGI server (Heroku deployment)
-dj-database-url>=2.1 # Parse DATABASE_URL (Heroku support)
+psycopg2-binary>=2.9 # PostgreSQL (Render/Heroku Production)
+gunicorn>=21.2       # WSGI server (Render deployment)
+dj-database-url>=2.1 # Parse DATABASE_URL for cloud DBs
 python-decouple>=3.8 # Manage environment variables
 
 # Testing
