@@ -98,7 +98,7 @@ Open the API docs (if enabled) at `http://127.0.0.1:8000/swagger/` (or `http://1
 
 > After migrations you can use this pre-set admin account to log in (only if you added it or seeded it in your database). If you did not create it, use `createsuperuser` instead.
 
-- **Registration number (username):** `admin`  
+- **Registration number:** `admin`  
 - **Password:** `1234`
 
 > ⚠️ **Security note:** Do not use these credentials in production. If you commit or share, change the password immediately in the Django admin or re-create a secure superuser.
