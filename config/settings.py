@@ -44,10 +44,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'django_filters', 
-    'drf_yasg', 
+    'django_filters',
+    'drf_yasg',
     'library',
-
 ]
 
 MIDDLEWARE = [
@@ -130,28 +129,34 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# Try to use JWT auth if package is available; otherwise fall back to session/basic
+try:
+    # attempt to import to detect availability
+    import rest_framework_simplejwt  # noqa: F401
+    JWT_AVAILABLE = True
+except Exception:
+    JWT_AVAILABLE = False
 
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
-    ),
-}
-
-# Simple JWT optional config
+# Simple JWT optional config (works only if package installed)
 from datetime import timedelta
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-# REST_FRAMEWORK additions
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
+# REST_FRAMEWORK consolidated and resilient to missing simplejwt
+if JWT_AVAILABLE:
+    DEFAULT_AUTH_CLASSES = (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
+    )
+else:
+    DEFAULT_AUTH_CLASSES = (
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    )
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": DEFAULT_AUTH_CLASSES,
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
