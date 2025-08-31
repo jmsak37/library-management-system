@@ -105,7 +105,7 @@ Open the API docs (if enabled) at `http://127.0.0.1:8000/swagger/` (or `http://1
 
 ---
 
-## 📌 Important API endpoints (examples)
+## 📌 Important API endpoints
 
 Base API root: `http://127.0.0.1:8000/api`
 
