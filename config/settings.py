@@ -25,7 +25,11 @@ SECRET_KEY = 'e#hocjn673881efip%^+a)e#1@d2_-b(ffi!1ed-+fkhea03xx'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "library-management-system-t7o4.onrender.com",
+]
 
 
 # Application definition
